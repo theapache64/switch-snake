@@ -2,10 +2,7 @@ import androidx.compose.desktop.Window
 import androidx.compose.foundation.background
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.Button
-import androidx.compose.material.Switch
-import androidx.compose.material.SwitchDefaults
-import androidx.compose.material.Text
+import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -41,6 +38,10 @@ enum class Direction {
     RIGHT, LEFT, UP, DOWN, IDLE
 }
 
+enum class CellType {
+    Switch, CheckBox, Radio
+}
+
 private val DEFAULT_DIRECTION = Direction.RIGHT
 
 
@@ -53,14 +54,25 @@ fun main() {
 
         SwitchSnakeTheme {
 
-            val snakeCellColor = SwitchDefaults.colors(checkedThumbColor = SNAKE_COLOR)
-            val appleCellColor = SwitchDefaults.colors(checkedThumbColor = APPLE_COLOR)
-            val defaultCellColor = SwitchDefaults.colors()
+            val snakeCellSwitchColor = SwitchDefaults.colors(checkedThumbColor = SNAKE_COLOR)
+            val appleCellSwitchColor = SwitchDefaults.colors(checkedThumbColor = APPLE_COLOR)
+            val defaultCellSwitchColor = SwitchDefaults.colors()
+
+
+            val snakeCellCheckboxColor = CheckboxDefaults.colors(checkedColor = SNAKE_COLOR)
+            val appleCellCheckboxColor = CheckboxDefaults.colors(checkedColor = APPLE_COLOR)
+            val defaultCellCheckboxColor = CheckboxDefaults.colors()
+
+            val snakeCellRadioColor = RadioButtonDefaults.colors(selectedColor = SNAKE_COLOR)
+            val appleCellRadioColor = RadioButtonDefaults.colors(selectedColor = APPLE_COLOR)
+            val defaultCellRadioColor = RadioButtonDefaults.colors()
+
 
             val snakeCells = remember { mutableStateListOf(*ORIGIN) }
             var appleCell by remember { mutableStateOf(getRandomAppleCell()) }
             var activeDirection by remember { mutableStateOf(DEFAULT_DIRECTION) }
             var isGameOver by remember { mutableStateOf(false) }
+            var cellType by remember { mutableStateOf(CellType.Switch) }
             var score by remember { mutableStateOf(0) }
 
             println("Rendering ...")
@@ -80,13 +92,13 @@ fun main() {
                             }
 
                             if (newDirection != null) {
-                                val isOpposite: Boolean =
+                                val isOpposite =
                                     (activeDirection == Direction.LEFT && newDirection == Direction.RIGHT) ||
                                             (activeDirection == Direction.RIGHT && newDirection == Direction.LEFT) ||
                                             (activeDirection == Direction.UP && newDirection == Direction.DOWN) ||
                                             (activeDirection == Direction.DOWN && newDirection == Direction.UP)
 
-                                if (isOpposite.not()) {
+                                if (!isOpposite) {
                                     println("New direction is $newDirection")
                                     activeDirection = newDirection
                                 } else {
@@ -97,6 +109,42 @@ fun main() {
                         false
                     }
             ) {
+
+                // Modes
+                Row(
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .padding(bottom = 10.dp)
+                ) {
+
+                    // Switch
+                    CustomRadioButton(
+                        selected = cellType == CellType.Switch,
+                        onClick = {
+                            cellType = CellType.Switch
+                        },
+                        text = "Switch"
+                    )
+
+                    // Checkbox
+                    CustomRadioButton(
+                        selected = cellType == CellType.CheckBox,
+                        onClick = {
+                            cellType = CellType.CheckBox
+                        },
+                        text = "CheckBox"
+                    )
+
+                    // Radio
+                    CustomRadioButton(
+                        selected = cellType == CellType.Radio,
+                        onClick = {
+                            cellType = CellType.Radio
+                        },
+                        text = "Radio"
+                    )
+
+                }
 
                 // Score
                 Text(
@@ -117,15 +165,41 @@ fun main() {
                                 val isAppleCell = appleCell.x == x && appleCell.y == y
 
                                 // Switch
-                                Switch(
-                                    checked = isSnakeCell || isAppleCell,
-                                    onCheckedChange = null,
-                                    colors = when {
-                                        isSnakeCell -> snakeCellColor
-                                        isAppleCell -> appleCellColor
-                                        else -> defaultCellColor
+                                when (cellType) {
+                                    CellType.Switch -> {
+                                        Switch(
+                                            checked = isSnakeCell || isAppleCell,
+                                            onCheckedChange = null,
+                                            colors = when {
+                                                isSnakeCell -> snakeCellSwitchColor
+                                                isAppleCell -> appleCellSwitchColor
+                                                else -> defaultCellSwitchColor
+                                            }
+                                        )
                                     }
-                                )
+                                    CellType.CheckBox -> {
+                                        Checkbox(
+                                            checked = isSnakeCell || isAppleCell,
+                                            onCheckedChange = null,
+                                            colors = when {
+                                                isSnakeCell -> snakeCellCheckboxColor
+                                                isAppleCell -> appleCellCheckboxColor
+                                                else -> defaultCellCheckboxColor
+                                            }
+                                        )
+                                    }
+                                    CellType.Radio -> {
+                                        RadioButton(
+                                            selected = isSnakeCell || isAppleCell,
+                                            onClick = null,
+                                            colors = when {
+                                                isSnakeCell -> snakeCellRadioColor
+                                                isAppleCell -> appleCellRadioColor
+                                                else -> defaultCellRadioColor
+                                            }
+                                        )
+                                    }
+                                }
                             }
                         }
                     }
