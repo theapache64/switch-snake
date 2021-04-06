@@ -6,7 +6,7 @@
 <img alt="Twitter: theapache64" src="https://img.shields.io/twitter/follow/theapache64.svg?style=social" />
 </a>
 
-> Switch Snake implemented using Compose Desktop. Inspired by https://twitter.com/theapache64/status/1379412076301479940
+> Switch Snake implemented using Compose Desktop. Inspired by [this tweet](https://twitter.com/theapache64/status/1379412076301479940)
 
 ### ✨ Demo
 
