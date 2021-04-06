@@ -10,7 +10,9 @@
 
 ### ✨ Demo
 
-![](demo.gif)
+![](demo.png)
+
+- 📽️ [Play Demo](demo.mp4)
 
 ## ✍️ Author
 
