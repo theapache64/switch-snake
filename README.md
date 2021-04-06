@@ -10,7 +10,7 @@
 
 ### ✨ Demo
 
-![](demo.png)
+![](demo.gif)
 
 - 📽️ [Play Demo](https://github.com/theapache64/switch-snake/blob/master/demo.mp4?raw=true)
 
