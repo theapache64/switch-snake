@@ -12,7 +12,7 @@
 
 ![](demo.png)
 
-- 📽️ [Play Demo](demo.mp4)
+- 📽️ [Play Demo](https://github.com/theapache64/switch-snake/blob/master/demo.mp4?raw=true)
 
 ## ✍️ Author
 
