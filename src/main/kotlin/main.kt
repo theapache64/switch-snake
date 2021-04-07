@@ -161,7 +161,9 @@ fun main() {
                             repeat(ROWS) { y ->
 
                                 // Finding cell
-                                val isSnakeCell = snakeCells.find { it.x == x && it.y == y } != null
+                                val snakeCell = snakeCells.find { it.x == x && it.y == y }
+                                val isSnakeCell = snakeCell != null
+                                val isHead = snakeCells.indexOf(snakeCell) == 0
                                 val isAppleCell = appleCell.x == x && appleCell.y == y
 
                                 // Switch
@@ -171,7 +173,11 @@ fun main() {
                                             checked = isSnakeCell || isAppleCell,
                                             onCheckedChange = null,
                                             colors = when {
-                                                isSnakeCell -> snakeCellSwitchColor
+                                                isSnakeCell -> if (isHead) {
+                                                    appleCellSwitchColor
+                                                } else {
+                                                    snakeCellSwitchColor
+                                                }
                                                 isAppleCell -> appleCellSwitchColor
                                                 else -> defaultCellSwitchColor
                                             }
@@ -182,7 +188,11 @@ fun main() {
                                             checked = isSnakeCell || isAppleCell,
                                             onCheckedChange = null,
                                             colors = when {
-                                                isSnakeCell -> snakeCellCheckboxColor
+                                                isSnakeCell -> if (isHead) {
+                                                    appleCellCheckboxColor
+                                                } else {
+                                                    snakeCellCheckboxColor
+                                                }
                                                 isAppleCell -> appleCellCheckboxColor
                                                 else -> defaultCellCheckboxColor
                                             }
@@ -193,7 +203,11 @@ fun main() {
                                             selected = isSnakeCell || isAppleCell,
                                             onClick = null,
                                             colors = when {
-                                                isSnakeCell -> snakeCellRadioColor
+                                                isSnakeCell -> if (isHead) {
+                                                    appleCellRadioColor
+                                                } else {
+                                                    snakeCellRadioColor
+                                                }
                                                 isAppleCell -> appleCellRadioColor
                                                 else -> defaultCellRadioColor
                                             }
