@@ -1,3 +1,5 @@
+package com.theapache64.switchsnake.theme
+
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.darkColors

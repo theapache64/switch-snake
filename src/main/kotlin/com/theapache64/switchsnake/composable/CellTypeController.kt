@@ -1,3 +1,5 @@
+package com.theapache64.switchsnake.composable
+
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
@@ -5,6 +7,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.theapache64.switchsnake.CellType
 
 @Composable
 fun BoxScope.CellTypeController(

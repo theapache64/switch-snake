@@ -1,8 +1,8 @@
+package com.theapache64.switchsnake
+
 import androidx.compose.desktop.Window
-import androidx.compose.foundation.background
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.Button
 import androidx.compose.material.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -13,7 +13,11 @@ import androidx.compose.ui.input.key.NativeKeyEvent
 import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import com.theapache64.switchsnake.composable.Alert
+import com.theapache64.switchsnake.composable.CellTypeController
+import com.theapache64.switchsnake.composable.Node
+import com.theapache64.switchsnake.model.Cell
+import com.theapache64.switchsnake.theme.SwitchSnakeTheme
 import kotlinx.coroutines.delay
 
 
@@ -35,7 +39,6 @@ val ORIGIN = arrayOf(
     Cell(0, 0),
 )
 
-
 enum class Direction {
     RIGHT, LEFT, UP, DOWN, IDLE
 }
@@ -56,6 +59,7 @@ fun main() {
 
         SwitchSnakeTheme {
 
+            var isStarted by remember { mutableStateOf(false) }
             val snakeCells = remember { mutableStateListOf(*ORIGIN) }
             var appleCell by remember { mutableStateOf(getRandomAppleCell()) }
             var activeDirection by remember { mutableStateOf(DEFAULT_DIRECTION) }
@@ -114,109 +118,116 @@ fun main() {
                 }
 
                 if (isGameOver) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(Color.Black.copy(alpha = 0.5f)),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.Center
-                    ) {
-                        Text("GAME OVER!", fontSize = 50.sp)
-                        Button(
-                            onClick = {
-                                snakeCells.clear()
-                                snakeCells.addAll(ORIGIN)
-                                activeDirection = Direction.RIGHT
-                                score = 0
-                                appleCell = getRandomAppleCell()
-                                isGameOver = false
-                            }
-                        ) {
-                            Text("RESTART")
+                    Alert(
+                        title = "GAME OVER!",
+                        action = "RESTART",
+                        onClicked = {
+                            // Restart game
+                            snakeCells.clear()
+                            snakeCells.addAll(ORIGIN)
+                            activeDirection = Direction.RIGHT
+                            score = 0
+                            appleCell = getRandomAppleCell()
+                            isGameOver = false
                         }
-                    }
+                    )
                 }
             }
 
-            LaunchedEffect(isGameOver) {
-                println("Game loop started")
+            if (isStarted) {
+                LaunchedEffect(isGameOver) {
+                    println("Game loop started")
 
 
-                while (!isGameOver) {
-                    delay(GAME_LOOP_DELAY)
+                    while (!isGameOver) {
+                        delay(GAME_LOOP_DELAY)
 
-                    val currentHead = snakeCells.first()
+                        val currentHead = snakeCells.first()
 
-                    // Finding heading path
-                    val newHead = when (activeDirection) {
-                        Direction.IDLE -> null
-                        Direction.RIGHT -> currentHead.copy(x = currentHead.x + 1)
-                        Direction.LEFT -> currentHead.copy(x = currentHead.x - 1)
-                        Direction.UP -> currentHead.copy(y = currentHead.y - 1)
-                        Direction.DOWN -> currentHead.copy(y = currentHead.y + 1)
-                    }
-
-
-                    // Adding new head
-                    if (newHead != null) {
-                        snakeCells.removeAt(snakeCells.size - 1)
-                        snakeCells.add(0, newHead)
-                        val newCells = snakeCells.toMutableList()
-                        snakeCells.clear()
-                        snakeCells.addAll(newCells)
-                    }
-
-
-                    // Collision detection
-                    val snakeHead = snakeCells.first()
-                    if (snakeHead.x < 0 || snakeHead.y < 0 || snakeHead.x >= COLUMNS || snakeHead.y >= ROWS) {
-                        println("Over: head is at $snakeHead")
-                        isGameOver = true
-                    }
-
-                    // is ate apple?
-                    if (snakeHead.x == appleCell.x && snakeHead.y == appleCell.y) {
-                        // apple ate
-                        appleCell = getRandomAppleCell()
-
-                        // Increase snake length
-                        val tail = snakeCells.last()
-                        val newTail = when (activeDirection) {
-                            Direction.LEFT -> {
-                                tail.copy(x = tail.x + 1)
-                            }
-                            Direction.RIGHT -> {
-                                tail.copy(x = tail.x - 1)
-                            }
-                            Direction.UP -> {
-                                tail.copy(y = tail.y + 1)
-                            }
-                            Direction.DOWN -> {
-                                tail.copy(y = tail.y - 1)
-                            }
+                        // Finding heading path
+                        val newHead = when (activeDirection) {
                             Direction.IDLE -> null
-                        }
-                        // Adding new tail
-                        if (newTail != null) {
-                            snakeCells.add(newTail)
+                            Direction.RIGHT -> currentHead.copy(x = currentHead.x + 1)
+                            Direction.LEFT -> currentHead.copy(x = currentHead.x - 1)
+                            Direction.UP -> currentHead.copy(y = currentHead.y - 1)
+                            Direction.DOWN -> currentHead.copy(y = currentHead.y + 1)
                         }
 
-                        // Increase score
-                        score += 2
+
+                        // Adding new head
+                        if (newHead != null) {
+                            snakeCells.removeAt(snakeCells.size - 1)
+                            snakeCells.add(0, newHead)
+                            val newCells = snakeCells.toMutableList()
+                            snakeCells.clear()
+                            snakeCells.addAll(newCells)
+                        }
+
+
+                        // Collision detection
+                        val snakeHead = snakeCells.first()
+                        if (snakeHead.x < 0 || snakeHead.y < 0 || snakeHead.x >= COLUMNS || snakeHead.y >= ROWS) {
+                            println("Over: head is at $snakeHead")
+                            isGameOver = true
+                        }
+
+                        // is ate apple?
+                        if (snakeHead.x == appleCell.x && snakeHead.y == appleCell.y) {
+                            // apple ate
+                            appleCell = getRandomAppleCell()
+
+                            // Increase snake length
+                            val tail = snakeCells.last()
+                            val newTail = when (activeDirection) {
+                                Direction.LEFT -> {
+                                    tail.copy(x = tail.x + 1)
+                                }
+                                Direction.RIGHT -> {
+                                    tail.copy(x = tail.x - 1)
+                                }
+                                Direction.UP -> {
+                                    tail.copy(y = tail.y + 1)
+                                }
+                                Direction.DOWN -> {
+                                    tail.copy(y = tail.y - 1)
+                                }
+                                Direction.IDLE -> null
+                            }
+                            // Adding new tail
+                            if (newTail != null) {
+                                snakeCells.add(newTail)
+                            }
+
+                            // Increase score
+                            score += 2
+                        }
                     }
-                }
 
+
+                }
+            } else {
+                Alert(
+                    title = "Switch Snake 🐍",
+                    action = "Let's Go!",
+                    onClicked = {
+                        isStarted = true
+                    }
+                )
             }
+
+
         }
     }
 }
+
 
 fun onKeyEvent(
     keyEvent: KeyEvent,
     activeDirection: Direction,
     onNewDirection: (Direction) -> Unit,
 ) {
-    if (keyEvent.nativeKeyEvent.id == NativeKeyEvent.KEY_PRESSED) {
+    println("KeyEvent: $keyEvent")
+    if (keyEvent.nativeKeyEvent.id == NativeKeyEvent.KEY_RELEASED) {
         val newDirection = when (keyEvent.nativeKeyEvent.keyCode) {
             NativeKeyEvent.VK_UP -> Direction.UP
             NativeKeyEvent.VK_DOWN -> Direction.DOWN

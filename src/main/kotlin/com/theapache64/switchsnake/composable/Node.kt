@@ -1,5 +1,11 @@
+package com.theapache64.switchsnake.composable
+
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
+import com.theapache64.switchsnake.APPLE_COLOR
+import com.theapache64.switchsnake.CellType
+import com.theapache64.switchsnake.SNAKE_COLOR
+import com.theapache64.switchsnake.model.Cell
 
 @Composable
 fun Node(
