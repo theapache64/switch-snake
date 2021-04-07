@@ -2,11 +2,13 @@ import androidx.compose.desktop.Window
 import androidx.compose.foundation.background
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.*
+import androidx.compose.material.Button
+import androidx.compose.material.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.key.KeyEvent
 import androidx.compose.ui.input.key.NativeKeyEvent
 import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.unit.IntSize
@@ -21,8 +23,8 @@ private const val SWITCH_WIDTH = 40
 private const val SWITCH_HEIGHT = 29
 private const val GAME_LOOP_DELAY = 120L
 
-private val APPLE_COLOR = Color(0xffff0800)
-private val SNAKE_COLOR = Color(0xff53B32C)
+val APPLE_COLOR = Color(0xffff0800)
+val SNAKE_COLOR = Color(0xff53B32C)
 const val WINDOW_PADDING = 60
 const val WINDOW_WIDTH = (SWITCH_WIDTH * COLUMNS) + WINDOW_PADDING
 const val WINDOW_HEIGHT = (SWITCH_HEIGHT * ROWS) + WINDOW_PADDING
@@ -54,20 +56,6 @@ fun main() {
 
         SwitchSnakeTheme {
 
-            val snakeCellSwitchColor = SwitchDefaults.colors(checkedThumbColor = SNAKE_COLOR)
-            val appleCellSwitchColor = SwitchDefaults.colors(checkedThumbColor = APPLE_COLOR)
-            val defaultCellSwitchColor = SwitchDefaults.colors()
-
-
-            val snakeCellCheckboxColor = CheckboxDefaults.colors(checkedColor = SNAKE_COLOR)
-            val appleCellCheckboxColor = CheckboxDefaults.colors(checkedColor = APPLE_COLOR)
-            val defaultCellCheckboxColor = CheckboxDefaults.colors()
-
-            val snakeCellRadioColor = RadioButtonDefaults.colors(selectedColor = SNAKE_COLOR)
-            val appleCellRadioColor = RadioButtonDefaults.colors(selectedColor = APPLE_COLOR)
-            val defaultCellRadioColor = RadioButtonDefaults.colors()
-
-
             val snakeCells = remember { mutableStateListOf(*ORIGIN) }
             var appleCell by remember { mutableStateOf(getRandomAppleCell()) }
             var activeDirection by remember { mutableStateOf(DEFAULT_DIRECTION) }
@@ -75,76 +63,30 @@ fun main() {
             var cellType by remember { mutableStateOf(CellType.Switch) }
             var score by remember { mutableStateOf(0) }
 
-            println("Rendering ...")
             Box(
                 contentAlignment = Alignment.Center,
                 modifier = Modifier
                     .fillMaxSize()
                     .focusable()
-                    .onKeyEvent {
-                        if (it.nativeKeyEvent.id == NativeKeyEvent.KEY_PRESSED) {
-                            val newDirection = when (it.nativeKeyEvent.keyCode) {
-                                NativeKeyEvent.VK_UP -> Direction.UP
-                                NativeKeyEvent.VK_DOWN -> Direction.DOWN
-                                NativeKeyEvent.VK_LEFT -> Direction.LEFT
-                                NativeKeyEvent.VK_RIGHT -> Direction.RIGHT
-                                else -> null
+                    .onKeyEvent { keyEvent ->
+                        onKeyEvent(
+                            keyEvent,
+                            activeDirection,
+                            onNewDirection = { newDirection ->
+                                activeDirection = newDirection
                             }
-
-                            if (newDirection != null) {
-                                val isOpposite =
-                                    (activeDirection == Direction.LEFT && newDirection == Direction.RIGHT) ||
-                                            (activeDirection == Direction.RIGHT && newDirection == Direction.LEFT) ||
-                                            (activeDirection == Direction.UP && newDirection == Direction.DOWN) ||
-                                            (activeDirection == Direction.DOWN && newDirection == Direction.UP)
-
-                                if (!isOpposite) {
-                                    println("New direction is $newDirection")
-                                    activeDirection = newDirection
-                                } else {
-                                    println("Declined direction -> $newDirection")
-                                }
-                            }
-                        }
+                        )
                         false
                     }
             ) {
 
                 // Modes
-                Row(
-                    modifier = Modifier
-                        .align(Alignment.BottomCenter)
-                        .padding(bottom = 10.dp)
-                ) {
-
-                    // Switch
-                    CustomRadioButton(
-                        selected = cellType == CellType.Switch,
-                        onClick = {
-                            cellType = CellType.Switch
-                        },
-                        text = "Switch"
-                    )
-
-                    // Checkbox
-                    CustomRadioButton(
-                        selected = cellType == CellType.CheckBox,
-                        onClick = {
-                            cellType = CellType.CheckBox
-                        },
-                        text = "CheckBox"
-                    )
-
-                    // Radio
-                    CustomRadioButton(
-                        selected = cellType == CellType.Radio,
-                        onClick = {
-                            cellType = CellType.Radio
-                        },
-                        text = "Radio"
-                    )
-
-                }
+                CellTypeController(
+                    cellType = cellType,
+                    onCellTypeChanged = { newCellType ->
+                        cellType = newCellType
+                    }
+                )
 
                 // Score
                 Text(
@@ -159,61 +101,13 @@ fun main() {
                     repeat(COLUMNS) { x ->
                         Column {
                             repeat(ROWS) { y ->
-
-                                // Finding cell
-                                val snakeCell = snakeCells.find { it.x == x && it.y == y }
-                                val isSnakeCell = snakeCell != null
-                                val isHead = snakeCells.indexOf(snakeCell) == 0
-                                val isAppleCell = appleCell.x == x && appleCell.y == y
-
-                                // Switch
-                                when (cellType) {
-                                    CellType.Switch -> {
-                                        Switch(
-                                            checked = isSnakeCell || isAppleCell,
-                                            onCheckedChange = null,
-                                            colors = when {
-                                                isSnakeCell -> if (isHead) {
-                                                    appleCellSwitchColor
-                                                } else {
-                                                    snakeCellSwitchColor
-                                                }
-                                                isAppleCell -> appleCellSwitchColor
-                                                else -> defaultCellSwitchColor
-                                            }
-                                        )
-                                    }
-                                    CellType.CheckBox -> {
-                                        Checkbox(
-                                            checked = isSnakeCell || isAppleCell,
-                                            onCheckedChange = null,
-                                            colors = when {
-                                                isSnakeCell -> if (isHead) {
-                                                    appleCellCheckboxColor
-                                                } else {
-                                                    snakeCellCheckboxColor
-                                                }
-                                                isAppleCell -> appleCellCheckboxColor
-                                                else -> defaultCellCheckboxColor
-                                            }
-                                        )
-                                    }
-                                    CellType.Radio -> {
-                                        RadioButton(
-                                            selected = isSnakeCell || isAppleCell,
-                                            onClick = null,
-                                            colors = when {
-                                                isSnakeCell -> if (isHead) {
-                                                    appleCellRadioColor
-                                                } else {
-                                                    snakeCellRadioColor
-                                                }
-                                                isAppleCell -> appleCellRadioColor
-                                                else -> defaultCellRadioColor
-                                            }
-                                        )
-                                    }
-                                }
+                                Node(
+                                    x = x,
+                                    y = y,
+                                    snakeCells = snakeCells,
+                                    cellType = cellType,
+                                    appleCell = appleCell
+                                )
                             }
                         }
                     }
@@ -312,6 +206,37 @@ fun main() {
                     }
                 }
 
+            }
+        }
+    }
+}
+
+fun onKeyEvent(
+    keyEvent: KeyEvent,
+    activeDirection: Direction,
+    onNewDirection: (Direction) -> Unit,
+) {
+    if (keyEvent.nativeKeyEvent.id == NativeKeyEvent.KEY_PRESSED) {
+        val newDirection = when (keyEvent.nativeKeyEvent.keyCode) {
+            NativeKeyEvent.VK_UP -> Direction.UP
+            NativeKeyEvent.VK_DOWN -> Direction.DOWN
+            NativeKeyEvent.VK_LEFT -> Direction.LEFT
+            NativeKeyEvent.VK_RIGHT -> Direction.RIGHT
+            else -> null
+        }
+
+        if (newDirection != null) {
+            val isOpposite =
+                (activeDirection == Direction.LEFT && newDirection == Direction.RIGHT) ||
+                        (activeDirection == Direction.RIGHT && newDirection == Direction.LEFT) ||
+                        (activeDirection == Direction.UP && newDirection == Direction.DOWN) ||
+                        (activeDirection == Direction.DOWN && newDirection == Direction.UP)
+
+            if (!isOpposite) {
+                println("New direction is $newDirection")
+                onNewDirection(newDirection)
+            } else {
+                println("Declined direction -> $newDirection")
             }
         }
     }
