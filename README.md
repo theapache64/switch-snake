@@ -6,11 +6,17 @@
 
 > Switch Snake implemented using Compose Desktop. Inspired by [this tweet](https://twitter.com/theapache64/status/1379412076301479940)
 
-### ✨ Demo
+## ✨ Demo
 
 ![](demo.gif)
 
 - 📽️ [Play Demo in Full Quality](https://www.youtube.com/watch?v=29bv6cVJ7w0)
+
+## 🏃 Run
+
+```
+./gradlew run
+```
 
 ## ✍️ Author
 
