@@ -10,7 +10,7 @@
 
 ![](demo.gif)
 
-- 📽️ [Play Demo in Full Quality](https://github.com/theapache64/switch-snake/blob/master/demo.mp4?raw=true)
+- 📽️ [Play Demo in Full Quality](https://www.youtube.com/watch?v=29bv6cVJ7w0)
 
 ## ✍️ Author
 
